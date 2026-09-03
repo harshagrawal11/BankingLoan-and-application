@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banking Loan Application & Risk Pipeline System</title>
+<meta name="description" content="Premium Banking Loan Application with multi-level approval pipeline, featuring Observer, Bridge, Abstract Factory, Chain of Responsibility, and Proxy design patterns.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ========== DESIGN SYSTEM ========== */
+:root {
+  --bg-deep: #050810;
+  --bg-primary: #0a0e1a;
+  --bg-card: rgba(15, 20, 40, 0.65);
+  --bg-card-solid: #0f1428;
+  --bg-elevated: rgba(20, 28, 58, 0.5);
+  --bg-input: rgba(12, 16, 32, 0.8);
+  --border: rgba(100, 180, 255, 0.08);
+  --border-focus: rgba(56, 189, 248, 0.4);
+  --border-glow: rgba(56, 189, 248, 0.15);
+  --text-primary: #e8edf5;
+  --text-secondary: #8893a7;
+  --text-muted: #4a5568;
+  --accent: #38bdf8;
+  --accent-dim: rgba(56, 189, 248, 0.15);
+  --accent-glow: rgba(56, 189, 248, 0.25);
+  --gold: #f59e0b;
+  --gold-dim: rgba(245, 158, 11, 0.15);
+  --success: #34d399;
+  --success-dim: rgba(52, 211, 153, 0.12);
+  --danger: #f87171;
+  --danger-dim: rgba(248, 113, 113, 0.12);
+  --purple: #a78bfa;
+  --purple-dim: rgba(167, 139, 250, 0.12);
+  --glass-bg: rgba(15, 20, 40, 0.55);
+  --glass-border: rgba(100, 180, 255, 0.1);
+  --glass-blur: 20px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 48px rgba(0,0,0,0.5);
+  --shadow-glow: 0 0 30px rgba(56, 189, 248, 0.08);
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+::selection { background: var(--accent); color: var(--bg-deep); }
+
+/* ========== BACKGROUND EFFECTS ========== */
+.bg-grid {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(56, 189, 248, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(56, 189, 248, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.bg-radial {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(56, 189, 248, 0.06) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 40% at 80% 80%, rgba(167, 139, 250, 0.04) 0%, transparent 50%);
+}
+
+/* ========== NAVIGATION ========== */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 32px;
+  background: rgba(5, 8, 16, 0.7);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  transition: var(--transition-normal);
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 12px;
+  font-weight: 700; font-size: 16px; letter-spacing: -0.02em;
+}
+.nav-brand .icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), #818cf8);
+  display: grid; place-items: center; font-size: 18px;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+}
+.nav-links {
+  display: flex; gap: 8px; list-style: none;
+}
+.nav-links a {
+  color: var(--text-secondary); text-decoration: none;
+  font-size: 13px; font-weight: 500; letter-spacing: 0.02em;
+  padding: 8px 16px; border-radius: var(--radius-sm);
+  transition: var(--transition-fast);
+}
+.nav-links a:hover, .nav-links a.active {
+  color: var(--text-primary); background: var(--accent-dim);
+}
+.nav-user {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px; color: var(--text-secondary);
+}
+.nav-user .avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  display: grid; place-items: center; font-size: 13px; font-weight: 600;
+  color: white;
+}
+.nav-user .logout-btn {
+  background: none; border: 1px solid var(--border);
+  color: var(--text-secondary); padding: 6px 12px;
+  border-radius: var(--radius-sm); cursor: pointer;
+  font-size: 12px; font-family: inherit;
+  transition: var(--transition-fast);
+}
+.nav-user .logout-btn:hover {
+  border-color: var(--danger); color: var(--danger);
+}
+.nav-hidden { display: none; }
+
+/* ========== LOGIN SCREEN ========== */
+#login-screen {
+  position: fixed; inset: 0; z-index: 2000;
+  display: grid; place-items: center;
+  background: var(--bg-deep);
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+#login-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+.login-bg-orbs {
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+}
+.login-bg-orbs .orb {
+  position: absolute; border-radius: 50%; filter: blur(80px);
+  animation: orbFloat 12s ease-in-out infinite;
+}
+.login-bg-orbs .orb:nth-child(1) {
+  width: 400px; height: 400px; top: -10%; left: -5%;
+  background: rgba(56, 189, 248, 0.08);
+}
+.login-bg-orbs .orb:nth-child(2) {
+  width: 350px; height: 350px; bottom: -10%; right: -5%;
+  background: rgba(167, 139, 250, 0.06);
+  animation-delay: -4s;
+}
+.login-bg-orbs .orb:nth-child(3) {
+  width: 250px; height: 250px; top: 40%; left: 60%;
+  background: rgba(245, 158, 11, 0.04);
+  animation-delay: -8s;
+}
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+.login-card {
+  position: relative; z-index: 1;
+  width: 420px; max-width: 92vw;
+  padding: 48px 40px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  animation: cardAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes cardAppear {
+  from { opacity: 0; transform: translateY(30px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.login-card.shake {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 50%, 70%, 90% { transform: translateX(-6px); }
+  20%, 40%, 60%, 80% { transform: translateX(6px); }
+}
+.login-card .login-icon {
+  width: 56px; height: 56px; border-radius: 16px;
+  background: linear-gradient(135deg, var(--accent), #818cf8);
+  display: grid; place-items: center; margin: 0 auto 24px;
+  font-size: 24px;
+  box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+}
+.login-card h1 {
+  text-align: center; font-size: 22px; font-weight: 700;
+  letter-spacing: -0.02em; margin-bottom: 6px;
+}
+.login-card .login-subtitle {
+  text-align: center; font-size: 14px; color: var(--text-secondary);
+  margin-bottom: 32px; line-height: 1.5;
+}
+.login-card .login-subtitle .pattern-tag {
+  display: inline-block; background: var(--purple-dim);
+  color: var(--purple); padding: 2px 8px; border-radius: 4px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block; font-size: 12px; font-weight: 600;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text-secondary); margin-bottom: 8px;
+}
+.form-group input {
+  width: 100%; padding: 12px 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary); font-family: inherit;
+  font-size: 14px; outline: none;
+  transition: var(--transition-fast);
+}
+.form-group input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+.form-group input::placeholder { color: var(--text-muted); }
+.form-group .input-hint {
+  margin-top: 6px; font-size: 11px; color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.login-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--accent), #818cf8);
+  border: none; border-radius: var(--radius-md);
+  color: white; font-family: inherit;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: var(--transition-normal);
+}
+.login-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 30px rgba(56, 189, 248, 0.3);
+}
+.login-btn:active { transform: translateY(0); }
+.login-btn .btn-shimmer {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 2.5s infinite;
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.login-error {
+  margin-top: 16px; padding: 10px 14px;
+  background: var(--danger-dim);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  border-radius: var(--radius-sm);
+  color: var(--danger); font-size: 13px;
+  display: none; align-items: center; gap: 8px;
+}
+.login-error.show { display: flex; }
+
+.login-demo-hint {
+  margin-top: 24px; padding-top: 20px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+.login-demo-hint p {
+  font-size: 12px; color: var(--text-muted); margin-bottom: 8px;
+}
+.login-demo-hint .demo-creds {
+  display: inline-flex; gap: 12px;
+  background: var(--bg-input); padding: 8px 16px;
+  border-radius: var(--radius-sm); border: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--accent);
+}
+
+/* ========== MAIN APP ========== */
+#app {
+  display: none; padding-top: 72px; min-height: 100vh;
+}
+#app.visible { display: block; }
+
+.container {
+  max-width: 1200px; margin: 0 auto; padding: 0 24px;
+}
+
+/* ========== HERO BANNER ========== */
+.hero-banner {
+  padding: 48px 0 32px; text-align: center;
+}
+.hero-banner .welcome-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent-dim); border: 1px solid rgba(56, 189, 248, 0.15);
+  padding: 6px 16px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; color: var(--accent);
+  letter-spacing: 0.04em; margin-bottom: 16px;
+}
+.hero-banner h1 {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 800; letter-spacing: -0.03em;
+  line-height: 1.15; margin-bottom: 12px;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 60%, var(--purple) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-banner p {
+  font-size: 15px; color: var(--text-secondary);
+  max-width: 600px; margin: 0 auto; line-height: 1.6;
+}
+
+/* ========== MAIN LAYOUT ========== */
+.app-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px; padding-bottom: 48px;
+}
+
+/* ========== GLASS CARD ========== */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: var(--transition-normal);
+}
+.glass-card:hover {
+  border-color: var(--border-glow);
+  box-shadow: var(--shadow-md), var(--shadow-glow);
+}
+.card-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+}
+.card-header .card-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: grid; place-items: center; font-size: 16px;
+}
+.card-header .card-icon.blue { background: var(--accent-dim); color: var(--accent); }
+.card-header .card-icon.gold { background: var(--gold-dim); color: var(--gold); }
+.card-header .card-icon.green { background: var(--success-dim); color: var(--success); }
+.card-header .card-icon.purple { background: var(--purple-dim); color: var(--purple); }
+.card-header h2 {
+  font-size: 15px; font-weight: 600; letter-spacing: -0.01em;
+}
+.card-header .card-badge {
+  margin-left: auto;
+  font-size: 10px; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 6px;
+}
+.card-badge.factory { background: var(--gold-dim); color: var(--gold); }
+.card-badge.bridge { background: var(--accent-dim); color: var(--accent); }
+.card-badge.chain { background: var(--success-dim); color: var(--success); }
+.card-badge.observer { background: var(--purple-dim); color: var(--purple); }
+.card-body { padding: 24px; }
+
+/* ========== FORM ELEMENTS ========== */
+.applicant-toggle {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  margin-bottom: 24px;
+}
+.applicant-toggle button {
+  padding: 14px 16px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-family: inherit; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: var(--transition-fast);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.applicant-toggle button .toggle-icon { font-size: 20px; }
+.applicant-toggle button.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.applicant-toggle button:hover:not(.active) {
+  border-color: var(--border-glow);
+  color: var(--text-primary);
+}
+
+.loan-type-cards {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  margin-bottom: 24px;
+}
+.loan-type-card {
+  padding: 16px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer; transition: var(--transition-fast);
+  text-align: center;
+}
+.loan-type-card .lt-icon { font-size: 24px; margin-bottom: 6px; }
+.loan-type-card .lt-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+.loan-type-card.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+.loan-type-card.active .lt-label { color: var(--accent); }
+.loan-type-card:hover:not(.active) { border-color: var(--border-glow); }
+
+.amount-input-wrap {
+  position: relative; margin-bottom: 24px;
+}
+.amount-input-wrap .currency {
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  font-size: 16px; font-weight: 600; color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+}
+.amount-input-wrap input {
+  width: 100%; padding: 14px 16px 14px 38px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary); font-family: 'JetBrains Mono', monospace;
+  font-size: 18px; font-weight: 600; outline: none;
+  transition: var(--transition-fast);
+}
+.amount-input-wrap input:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+.amount-input-wrap input::placeholder {
+  color: var(--text-muted); font-weight: 400; font-size: 14px;
+}
+.amount-input-wrap .amount-label {
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  font-size: 12px; color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.notif-options {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  margin-bottom: 24px;
+}
+.notif-option {
+  padding: 12px; display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer; transition: var(--transition-fast);
+}
+.notif-option .no-icon { font-size: 20px; }
+.notif-option .no-label { font-size: 11px; font-weight: 500; color: var(--text-secondary); }
+.notif-option.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+.notif-option.active .no-label { color: var(--accent); }
+.notif-option:hover:not(.active) { border-color: var(--border-glow); }
+
+.submit-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--accent), #818cf8);
+  border: none; border-radius: var(--radius-md);
+  color: white; font-family: inherit;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: var(--transition-normal);
+}
+.submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 30px rgba(56, 189, 248, 0.3);
+}
+.submit-btn:active { transform: translateY(0); }
+.submit-btn:disabled {
+  opacity: 0.5; cursor: not-allowed; transform: none;
+  box-shadow: none;
+}
+.submit-btn .btn-shimmer {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  transform: translateX(-100%);
+}
+.submit-btn:not(:disabled) .btn-shimmer { animation: shimmer 2.5s infinite; }
+
+/* ========== PIPELINE SECTION ========== */
+.pipeline-section { grid-column: 1 / -1; }
+.pipeline-track {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0; padding: 8px 24px 24px;
+}
+.pipeline-node {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 10px; flex: 0 0 auto; position: relative;
+}
+.pipeline-node .node-circle {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--bg-input);
+  border: 2px solid var(--border);
+  display: grid; place-items: center;
+  font-size: 22px; position: relative;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.pipeline-node .node-circle .node-pulse {
+  position: absolute; inset: -4px; border-radius: 50%;
+  border: 2px solid transparent;
+  transition: all 0.6s ease;
+}
+.pipeline-node.processing .node-circle {
+  border-color: var(--gold);
+  box-shadow: 0 0 20px var(--gold-dim);
+}
+.pipeline-node.processing .node-pulse {
+  border-color: var(--gold);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+.pipeline-node.approved .node-circle {
+  border-color: var(--success);
+  background: var(--success-dim);
+  box-shadow: 0 0 24px rgba(52, 211, 153, 0.15);
+}
+.pipeline-node.skipped .node-circle {
+  opacity: 0.35;
+}
+.pipeline-node.rejected .node-circle {
+  border-color: var(--danger);
+  background: var(--danger-dim);
+  box-shadow: 0 0 24px rgba(248, 113, 113, 0.15);
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.25); opacity: 0; }
+}
+
+.pipeline-node .node-info { text-align: center; }
+.pipeline-node .node-title {
+  font-size: 13px; font-weight: 600; color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.pipeline-node .node-limit {
+  font-size: 11px; color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+.pipeline-node .node-status {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 4px;
+  display: none;
+}
+.pipeline-node.approved .node-status {
+  display: block; background: var(--success-dim); color: var(--success);
+}
+.pipeline-node.rejected .node-status {
+  display: block; background: var(--danger-dim); color: var(--danger);
+}
+.pipeline-node.skipped .node-status {
+  display: block; color: var(--text-muted);
+}
+
+.pipeline-connector {
+  width: 80px; height: 2px;
+  background: var(--border);
+  position: relative; margin-bottom: 40px;
+  transition: background 0.6s ease;
+}
+.pipeline-connector.active {
+  background: linear-gradient(90deg, var(--success), var(--accent));
+}
+.pipeline-connector .connector-flow {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  transform: translateX(-100%);
+  opacity: 0;
+}
+.pipeline-connector.flowing .connector-flow {
+  opacity: 1;
+  animation: flow 1s ease-in-out forwards;
+}
+@keyframes flow {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ========== TERMINAL / RESULTS ========== */
+.results-section { grid-column: 1 / -1; }
+.terminal {
+  background: rgba(8, 10, 20, 0.9);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  font-family: 'JetBrains Mono', monospace;
+}
+.terminal-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px;
+  background: rgba(15, 20, 40, 0.8);
+  border-bottom: 1px solid var(--border);
+}
+.terminal-dots {
+  display: flex; gap: 6px;
+}
+.terminal-dots span {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.terminal-dots span:nth-child(1) { background: #f87171; }
+.terminal-dots span:nth-child(2) { background: #fbbf24; }
+.terminal-dots span:nth-child(3) { background: #34d399; }
+.terminal-bar .terminal-title {
+  font-size: 12px; color: var(--text-muted);
+  margin-left: 8px;
+}
+.terminal-body {
+  padding: 20px; min-height: 200px; max-height: 400px;
+  overflow-y: auto;
+}
+.terminal-body::-webkit-scrollbar { width: 4px; }
+.terminal-body::-webkit-scrollbar-track { background: transparent; }
+.terminal-body::-webkit-scrollbar-thumb {
+  background: var(--border); border-radius: 2px;
+}
+.terminal-line {
+  font-size: 12px; line-height: 1.8; color: var(--text-secondary);
+  opacity: 0; transform: translateY(8px);
+  animation: lineAppear 0.4s ease forwards;
+}
+.terminal-line .t-prefix { color: var(--accent); }
+.terminal-line .t-success { color: var(--success); }
+.terminal-line .t-warn { color: var(--gold); }
+.terminal-line .t-error { color: var(--danger); }
+.terminal-line .t-purple { color: var(--purple); }
+.terminal-line .t-muted { color: var(--text-muted); }
+@keyframes lineAppear {
+  to { opacity: 1; transform: translateY(0); }
+}
+.terminal-placeholder {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; min-height: 160px;
+  color: var(--text-muted); gap: 8px; font-size: 13px;
+}
+.terminal-placeholder .tp-icon { font-size: 32px; opacity: 0.4; }
+
+/* ========== ARCHITECTURE SECTION ========== */
+#architecture { padding: 64px 0 80px; }
+.arch-header {
+  text-align: center; margin-bottom: 48px;
+}
+.arch-header .arch-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; color: var(--purple);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.arch-header h2 {
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 700; letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+.arch-header p {
+  color: var(--text-secondary); font-size: 14px;
+  max-width: 520px; margin: 0 auto;
+}
+
+.pattern-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 16px;
+}
+.pattern-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  transition: var(--transition-normal);
+  cursor: default;
+}
+.pattern-card:hover {
+  border-color: var(--border-glow);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.pattern-card .pc-top {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px;
+}
+.pattern-card .pc-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: grid; place-items: center; font-size: 18px;
+}
+.pattern-card .pc-name {
+  font-size: 14px; font-weight: 600;
+}
+.pattern-card .pc-tag {
+  margin-left: auto;
+  font-size: 10px; font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 3px 8px; border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+.pattern-card .pc-desc {
+  font-size: 13px; color: var(--text-secondary);
+  line-height: 1.6; margin-bottom: 16px;
+}
+.pattern-card .pc-code {
+  background: rgba(8, 10, 20, 0.8);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px; overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; line-height: 1.7;
+  color: var(--text-secondary);
+}
+.pc-code .kw { color: var(--purple); }
+.pc-code .cl { color: var(--accent); }
+.pc-code .fn { color: var(--gold); }
+.pc-code .st { color: var(--success); }
+.pc-code .cm { color: var(--text-muted); font-style: italic; }
+.pc-code .num { color: #f97316; }
+
+/* ========== FOOTER ========== */
+footer {
+  padding: 24px 0;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+footer p {
+  font-size: 12px; color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+footer a { color: var(--accent); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 900px) {
+  .app-grid { grid-template-columns: 1fr; }
+  .pipeline-section, .results-section { grid-column: 1; }
+  nav { padding: 12px 16px; }
+  .nav-links { display: none; }
+  .container { padding: 0 16px; }
+  .card-body { padding: 20px; }
+  .pipeline-track { flex-wrap: wrap; gap: 16px; }
+  .pipeline-connector { width: 40px; }
+  .pattern-grid { grid-template-columns: 1fr; }
+  .loan-type-cards, .notif-options { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .applicant-toggle { grid-template-columns: 1fr; }
+  .pipeline-track { flex-direction: column; align-items: center; }
+  .pipeline-connector {
+    width: 2px; height: 40px; margin-bottom: 0;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-radial"></div>
+
+<!-- ========== LOGIN SCREEN ========== -->
+<div id="login-screen">
+  <div class="login-bg-orbs">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+  </div>
+  <div class="login-card" id="login-card">
+    <div class="login-icon">🏦</div>
+    <h1>Banking Loan System</h1>
+    <p class="login-subtitle">
+      Employee Authentication Portal<br>
+      <span class="pattern-tag">PROXY PATTERN</span>
+    </p>
+    <form id="login-form" autocomplete="off">
+      <div class="form-group">
+        <label for="login-id">Employee ID</label>
+        <input type="text" id="login-id" placeholder="Enter your Employee ID" autofocus>
+        <div class="input-hint">ProxyLoanManagementService.authenticate()</div>
+      </div>
+      <div class="form-group">
+        <label for="login-pass">Password</label>
+        <input type="password" id="login-pass" placeholder="Enter your password">
+      </div>
+      <button type="submit" class="login-btn" id="login-btn">
+        <span class="btn-shimmer"></span>
+        Authenticate & Enter
+      </button>
+      <div class="login-error" id="login-error">
+        <span>⚠️</span>
+        <span id="login-error-msg">Access Denied: Invalid credentials.</span>
+      </div>
+    </form>
+    <div class="login-demo-hint">
+      <p>Demo Credentials</p>
+      <div class="demo-creds">
+        <span>ID: EMP101</span>
+        <span>Pass: pass101</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== NAVIGATION ========== -->
+<nav id="main-nav" class="nav-hidden">
+  <div class="nav-brand">
+    <div class="icon">🏦</div>
+    <span>LoanPipeline</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#dashboard" class="active">Dashboard</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+  </ul>
+  <div class="nav-user">
+    <span id="server-status" style="font-size:11px;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:5px;margin-right:8px;"></span>
+    <span id="nav-username"></span>
+    <div class="avatar" id="nav-avatar"></div>
+    <button class="logout-btn" id="logout-btn">Logout</button>
+  </div>
+</nav>
+
+<!-- ========== MAIN APPLICATION ========== -->
+<main id="app">
+  <div class="container">
+
+    <!-- HERO -->
+    <section class="hero-banner" id="dashboard">
+      <div class="welcome-tag">
+        <span>✦</span> Banking Loan Application & Risk Pipeline System
+      </div>
+      <h1>Apply for a Loan,<br>Watch It Flow</h1>
+      <p>Submit your loan application and watch it travel through the multi-level approval pipeline — Branch Manager, Regional Head, and Risk Committee.</p>
+    </section>
+
+    <!-- MAIN GRID -->
+    <div class="app-grid">
+
+      <!-- LEFT: LOAN APPLICATION FORM -->
+      <div class="glass-card" id="loan-form-card">
+        <div class="card-header">
+          <div class="card-icon blue">📋</div>
+          <h2>Loan Application</h2>
+          <span class="card-badge factory">Abstract Factory</span>
+        </div>
+        <div class="card-body">
+          <!-- Applicant Type -->
+          <div class="form-group">
+            <label>Applicant Type</label>
+            <div class="applicant-toggle" id="applicant-toggle">
+              <button type="button" class="active" data-value="salaried">
+                <span class="toggle-icon">💼</span>
+                Salaried
+              </button>
+              <button type="button" data-value="self-employed">
+                <span class="toggle-icon">🏪</span>
+                Self-Employed
+              </button>
+            </div>
+          </div>
+
+          <!-- Loan Type -->
+          <div class="form-group">
+            <label>Loan Type</label>
+            <div class="loan-type-cards" id="loan-type-cards">
+              <div class="loan-type-card active" data-value="Personal">
+                <div class="lt-icon">👤</div>
+                <div class="lt-label">Personal</div>
+              </div>
+              <div class="loan-type-card" data-value="Housing">
+                <div class="lt-icon">🏠</div>
+                <div class="lt-label">Housing</div>
+              </div>
+              <div class="loan-type-card" data-value="Vehicle">
+                <div class="lt-icon">🚗</div>
+                <div class="lt-label">Vehicle</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Loan Amount -->
+          <div class="form-group">
+            <label>Loan Amount</label>
+            <div class="amount-input-wrap">
+              <span class="currency">₹</span>
+              <input type="text" id="loan-amount" placeholder="Enter amount" inputmode="numeric">
+              <span class="amount-label" id="amount-label"></span>
+            </div>
+          </div>
+
+          <!-- Notification Preference -->
+          <div class="form-group">
+            <label>Notification Channel <span style="font-family:'JetBrains Mono';font-size:10px;color:var(--accent);text-transform:none;letter-spacing:0;">Bridge Pattern</span></label>
+            <div class="notif-options" id="notif-options">
+              <div class="notif-option active" data-value="Email">
+                <span class="no-icon">📧</span>
+                <span class="no-label">Email</span>
+              </div>
+              <div class="notif-option" data-value="SMS">
+                <span class="no-icon">💬</span>
+                <span class="no-label">SMS</span>
+              </div>
+              <div class="notif-option" data-value="MobileApp">
+                <span class="no-icon">📱</span>
+                <span class="no-label">Mobile App</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <button type="button" class="submit-btn" id="submit-btn" disabled>
+            <span class="btn-shimmer"></span>
+            Submit Loan Application
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT: LIVE SUMMARY -->
+      <div class="glass-card" id="summary-card">
+        <div class="card-header">
+          <div class="card-icon gold">📊</div>
+          <h2>Application Summary</h2>
+        </div>
+        <div class="card-body">
+          <div id="summary-content" style="display:flex;flex-direction:column;gap:16px;">
+            <div class="summary-row">
+              <span class="sr-label">Applicant Type</span>
+              <span class="sr-value" id="sum-applicant">Salaried</span>
+            </div>
+            <div class="summary-row">
+              <span class="sr-label">Factory Used</span>
+              <span class="sr-value mono" id="sum-factory">SalariedLoanFactory</span>
+            </div>
+            <div class="summary-row">
+              <span class="sr-label">Loan Type</span>
+              <span class="sr-value" id="sum-loantype">Personal</span>
+            </div>
+            <div class="summary-row">
+              <span class="sr-label">Loan Class</span>
+              <span class="sr-value mono" id="sum-class">SalariedPersonalLoan</span>
+            </div>
+            <div class="summary-row">
+              <span class="sr-label">Amount</span>
+              <span class="sr-value accent" id="sum-amount">₹0</span>
+            </div>
+            <div class="summary-row">
+              <span class="sr-label">Notification</span>
+              <span class="sr-value" id="sum-notif">📧 Email</span>
+            </div>
+            <div class="summary-row">
+              <span class="sr-label">Notifier Class</span>
+              <span class="sr-value mono" id="sum-notif-class">EmailNotification</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-row">
+              <span class="sr-label">Approval Path</span>
+              <span class="sr-value" id="sum-path">—</span>
+            </div>
+            <div class="summary-row">
+              <span class="sr-label">Approver</span>
+              <span class="sr-value" id="sum-approver">—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PIPELINE VISUALIZATION -->
+      <div class="glass-card pipeline-section" id="pipeline-card">
+        <div class="card-header">
+          <div class="card-icon green">⛓️</div>
+          <h2>Approval Pipeline</h2>
+          <span class="card-badge chain">Chain of Responsibility</span>
+        </div>
+        <div class="pipeline-track" id="pipeline-track">
+          <!-- Node 1: Branch Manager -->
+          <div class="pipeline-node" id="node-branch">
+            <div class="node-circle">
+              <div class="node-pulse"></div>
+              🏢
+            </div>
+            <div class="node-info">
+              <div class="node-title">Branch Manager</div>
+              <div class="node-limit">≤ ₹50,000</div>
+            </div>
+            <div class="node-status" id="status-branch">—</div>
+          </div>
+
+          <div class="pipeline-connector" id="conn-1">
+            <div class="connector-flow"></div>
+          </div>
+
+          <!-- Node 2: Regional Head -->
+          <div class="pipeline-node" id="node-regional">
+            <div class="node-circle">
+              <div class="node-pulse"></div>
+              🏛️
+            </div>
+            <div class="node-info">
+              <div class="node-title">Regional Head</div>
+              <div class="node-limit">≤ ₹2,00,000</div>
+            </div>
+            <div class="node-status" id="status-regional">—</div>
+          </div>
+
+          <div class="pipeline-connector" id="conn-2">
+            <div class="connector-flow"></div>
+          </div>
+
+          <!-- Node 3: Risk Committee -->
+          <div class="pipeline-node" id="node-risk">
+            <div class="node-circle">
+              <div class="node-pulse"></div>
+              🛡️
+            </div>
+            <div class="node-info">
+              <div class="node-title">Risk Committee</div>
+              <div class="node-limit">≤ ₹5,00,000</div>
+            </div>
+            <div class="node-status" id="status-risk">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTS TERMINAL -->
+      <div class="results-section" id="results-section">
+        <div class="terminal" id="terminal">
+          <div class="terminal-bar">
+            <div class="terminal-dots">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="terminal-title">loan-pipeline-output</span>
+          </div>
+          <div class="terminal-body" id="terminal-body">
+            <div class="terminal-placeholder">
+              <span class="tp-icon">⌨️</span>
+              <span>Submit a loan application to see the pipeline output</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end app-grid -->
+
+    <!-- ARCHITECTURE SHOWCASE -->
+    <section id="architecture">
+      <div class="arch-header">
+        <div class="arch-tag">⚡ Design Patterns</div>
+        <h2>System Architecture</h2>
+        <p>Five design patterns working in harmony, extracted from <code style="background:var(--bg-input);padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:12px;">Main.java</code></p>
+      </div>
+
+      <div class="pattern-grid">
+
+        <!-- 1. Singleton -->
+        <div class="pattern-card">
+          <div class="pc-top">
+            <div class="pc-icon" style="background:var(--accent-dim);color:var(--accent);">🔒</div>
+            <span class="pc-name">Singleton</span>
+            <span class="pc-tag" style="background:var(--accent-dim);color:var(--accent);">Creational</span>
+          </div>
+          <p class="pc-desc">LoanCoordinator and LoanManagementSystem use the Singleton pattern — guaranteeing a single instance to coordinate all loan processing and observer notifications.</p>
+          <div class="pc-code">
+<span class="kw">class</span> <span class="cl">LoanCoordinator</span> {
+  <span class="kw">private static</span> LoanCoordinator <span class="fn">instance</span>;
+  <span class="kw">public static</span> LoanCoordinator <span class="fn">getInstance</span>() {
+    <span class="kw">if</span> (instance == <span class="kw">null</span>)
+      instance = <span class="kw">new</span> <span class="cl">LoanCoordinator</span>();
+    <span class="kw">return</span> instance;
+  }
+}</div>
+        </div>
+
+        <!-- 2. Observer -->
+        <div class="pattern-card">
+          <div class="pc-top">
+            <div class="pc-icon" style="background:var(--purple-dim);color:var(--purple);">👁️</div>
+            <span class="pc-name">Observer</span>
+            <span class="pc-tag" style="background:var(--purple-dim);color:var(--purple);">Behavioral</span>
+          </div>
+          <p class="pc-desc">AuditDepartment and AccountsDepartment observe loan approvals. When a loan is approved, both departments are automatically notified for logging and risk checks.</p>
+          <div class="pc-code">
+<span class="kw">interface</span> <span class="cl">LoanObserver</span> {
+  <span class="kw">void</span> <span class="fn">update</span>(Loan request, String approver);
+}
+<span class="kw">class</span> <span class="cl">AuditDepartment</span> <span class="kw">implements</span> LoanObserver {
+  <span class="cm">// Loan logged for ₹amount approved by approver</span>
+}
+<span class="kw">class</span> <span class="cl">AccountsDepartment</span> <span class="kw">implements</span> LoanObserver {
+  <span class="cm">// Disbursement and risk allocation checked</span>
+}</div>
+        </div>
+
+        <!-- 3. Abstract Factory -->
+        <div class="pattern-card">
+          <div class="pc-top">
+            <div class="pc-icon" style="background:var(--gold-dim);color:var(--gold);">🏭</div>
+            <span class="pc-name">Abstract Factory</span>
+            <span class="pc-tag" style="background:var(--gold-dim);color:var(--gold);">Creational</span>
+          </div>
+          <p class="pc-desc">SalariedLoanFactory and SelfEmployedLoanFactory create the correct loan type (Personal, Housing, Vehicle) based on the applicant's employment status.</p>
+          <div class="pc-code">
+<span class="kw">abstract class</span> <span class="cl">LoanFactory</span> {
+  <span class="kw">abstract</span> Loan <span class="fn">createLoan</span>(type, amount, notifier);
+}
+<span class="kw">class</span> <span class="cl">SalariedLoanFactory</span> <span class="kw">extends</span> LoanFactory {
+  <span class="cm">// → SalariedPersonalLoan</span>
+  <span class="cm">// → SalariedHousingLoan</span>
+  <span class="cm">// → SalariedVehicleLoan</span>
+}</div>
+        </div>
+
+        <!-- 4. Bridge -->
+        <div class="pattern-card">
+          <div class="pc-top">
+            <div class="pc-icon" style="background:var(--accent-dim);color:var(--accent);">🌉</div>
+            <span class="pc-name">Bridge</span>
+            <span class="pc-tag" style="background:var(--accent-dim);color:var(--accent);">Structural</span>
+          </div>
+          <p class="pc-desc">NotificationChannel decouples the notification mechanism (Email, SMS, Mobile App) from the loan processing logic, allowing independent variation.</p>
+          <div class="pc-code">
+<span class="kw">interface</span> <span class="cl">NotificationChannel</span> {
+  <span class="kw">void</span> <span class="fn">sendNotification</span>(String message);
+}
+<span class="kw">class</span> <span class="cl">EmailNotification</span> <span class="kw">implements</span> NotificationChannel
+<span class="kw">class</span> <span class="cl">SMSNotification</span> <span class="kw">implements</span> NotificationChannel
+<span class="kw">class</span> <span class="cl">MobileAppNotification</span> <span class="kw">implements</span> NotificationChannel</div>
+        </div>
+
+        <!-- 5. Chain of Responsibility -->
+        <div class="pattern-card">
+          <div class="pc-top">
+            <div class="pc-icon" style="background:var(--success-dim);color:var(--success);">⛓️</div>
+            <span class="pc-name">Chain of Responsibility</span>
+            <span class="pc-tag" style="background:var(--success-dim);color:var(--success);">Behavioral</span>
+          </div>
+          <p class="pc-desc">Loan requests flow through BranchManager → RegionalHead → RiskCommittee. Each handler approves within its limit or forwards to the next level.</p>
+          <div class="pc-code">
+BranchManager:  ≤ ₹<span class="num">50,000</span>  → <span class="st">Approved</span>
+RegionalHead:   ≤ ₹<span class="num">2,00,000</span> → <span class="st">Approved</span>
+RiskCommittee:  ≤ ₹<span class="num">5,00,000</span> → <span class="st">Approved</span>
+<span class="cm">// Amount > ₹5,00,000 → REJECTED</span></div>
+        </div>
+
+        <!-- 6. Proxy -->
+        <div class="pattern-card">
+          <div class="pc-top">
+            <div class="pc-icon" style="background:var(--danger-dim);color:var(--danger);">🛡️</div>
+            <span class="pc-name">Proxy</span>
+            <span class="pc-tag" style="background:var(--danger-dim);color:var(--danger);">Structural</span>
+          </div>
+          <p class="pc-desc">ProxyLoanManagementService authenticates employees before granting access to the real LoanManagementSystem. Invalid credentials are blocked at the gate.</p>
+          <div class="pc-code">
+<span class="kw">class</span> <span class="cl">ProxyLoanManagementService</span> {
+  <span class="kw">private boolean</span> <span class="fn">authenticate</span>() {
+    String[] knownIds = {<span class="st">"EMP101"</span>,<span class="st">"EMP102"</span>,<span class="st">"EMP103"</span>};
+    String[] knownPass = {<span class="st">"pass101"</span>,<span class="st">"pass102"</span>,<span class="st">"pass103"</span>};
+    <span class="cm">// match username & password</span>
+  }
+}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>Banking Loan Application & Risk Pipeline System — Built with ❤️ by <a href="https://github.com/harshagrawal11" target="_blank" rel="noopener">harshagrawal11</a> · Java Design Patterns Showcase</p>
+    </footer>
+
+  </div>
+</main>
+
+<!-- ========== SUMMARY ROW STYLES ========== -->
+<style>
+.summary-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0;
+}
+.sr-label {
+  font-size: 12px; color: var(--text-muted);
+  font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.sr-value {
+  font-size: 13px; font-weight: 500; color: var(--text-primary);
+  text-align: right;
+}
+.sr-value.mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--accent);
+  background: var(--accent-dim);
+  padding: 3px 8px; border-radius: 4px;
+}
+.sr-value.accent { color: var(--gold); font-weight: 600; }
+.summary-divider {
+  height: 1px; background: var(--border); margin: 4px 0;
+}
+</style>
+
+<!-- ========== JAVASCRIPT ========== -->
+<script>
+(function() {
+  'use strict';
+
+  // ===== API CONFIGURATION =====
+  const API_BASE = 'http://localhost:8080';
+  let serverOnline = false;
+
+  // Fallback credentials (used when Java server is offline)
+  const FALLBACK_CREDENTIALS = [
+    { id: 'EMP101', pass: 'pass101', name: 'Harsh Agrawal' },
+    { id: 'EMP102', pass: 'pass102', name: 'Priya Sharma' },
+    { id: 'EMP103', pass: 'pass103', name: 'Raj Patel' }
+  ];
+
+  let currentUser = null;
+  let currentPassword = '';
+
+  // DOM refs
+  const loginScreen = document.getElementById('login-screen');
+  const loginForm = document.getElementById('login-form');
+  const loginCard = document.getElementById('login-card');
+  const loginError = document.getElementById('login-error');
+  const loginErrorMsg = document.getElementById('login-error-msg');
+  const loginIdInput = document.getElementById('login-id');
+  const loginPassInput = document.getElementById('login-pass');
+  const mainNav = document.getElementById('main-nav');
+  const app = document.getElementById('app');
+  const navUsername = document.getElementById('nav-username');
+  const navAvatar = document.getElementById('nav-avatar');
+  const logoutBtn = document.getElementById('logout-btn');
+  const serverStatusEl = document.getElementById('server-status');
+
+  // ===== SERVER HEALTH CHECK =====
+  async function checkServerHealth() {
+    try {
+      const res = await fetch(`${API_BASE}/api/health`, { signal: AbortSignal.timeout(2000) });
+      if (res.ok) {
+        serverOnline = true;
+        serverStatusEl.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:#34d399;display:inline-block;"></span> Java Server';
+        serverStatusEl.style.color = '#34d399';
+        return true;
+      }
+    } catch (e) {}
+    serverOnline = false;
+    serverStatusEl.innerHTML = '<span style="width:7px;height:7px;border-radius:50%;background:#f59e0b;display:inline-block;"></span> Offline Mode';
+    serverStatusEl.style.color = '#f59e0b';
+    return false;
+  }
+
+  // ===== LOGIN (calls Java backend POST /api/login) =====
+  loginForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const userId = loginIdInput.value.trim();
+    const password = loginPassInput.value;
+
+    if (!userId || !password) return;
+
+    const loginBtn = document.getElementById('login-btn');
+    loginBtn.textContent = 'Authenticating...';
+    loginBtn.disabled = true;
+
+    // Check server health first
+    await checkServerHealth();
+
+    if (serverOnline) {
+      // ── Call Java backend (Proxy Pattern on server) ──
+      try {
+        const res = await fetch(`${API_BASE}/api/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          currentUser = { id: userId, name: data.name };
+          currentPassword = password;
+          loginError.classList.remove('show');
+          loginScreen.classList.add('hidden');
+          mainNav.classList.remove('nav-hidden');
+          app.classList.add('visible');
+          navUsername.textContent = data.name;
+          navAvatar.textContent = data.name.charAt(0);
+          addTerminalLine(`<span class="t-success">✓ [Java Server] ${data.message}</span>`);
+          addTerminalLine(`<span class="t-muted">  Welcome, ${data.name} — connected to LoanServer.java</span>`);
+          addTerminalLine('');
+        } else {
+          loginErrorMsg.textContent = data.message || 'Access Denied: Invalid credentials.';
+          loginError.classList.add('show');
+          loginCard.classList.add('shake');
+          setTimeout(() => loginCard.classList.remove('shake'), 500);
+        }
+      } catch (err) {
+        loginErrorMsg.textContent = 'Server error: ' + err.message;
+        loginError.classList.add('show');
+        loginCard.classList.add('shake');
+        setTimeout(() => loginCard.classList.remove('shake'), 500);
+      }
+    } else {
+      // ── Offline fallback (client-side auth) ──
+      const match = FALLBACK_CREDENTIALS.find(
+        c => c.id.toLowerCase() === userId.toLowerCase() && c.pass === password
+      );
+      if (match) {
+        currentUser = match;
+        currentPassword = password;
+        loginError.classList.remove('show');
+        loginScreen.classList.add('hidden');
+        mainNav.classList.remove('nav-hidden');
+        app.classList.add('visible');
+        navUsername.textContent = match.name;
+        navAvatar.textContent = match.name.charAt(0);
+        addTerminalLine(`<span class="t-warn">⚠ Java server offline — running in frontend-only mode</span>`);
+        addTerminalLine(`<span class="t-success">✓ Login successful for user: ${match.id} (offline auth)</span>`);
+        addTerminalLine(`<span class="t-muted">  Welcome, ${match.name}</span>`);
+        addTerminalLine('');
+      } else {
+        loginErrorMsg.textContent = 'Access Denied: Invalid credentials.';
+        loginError.classList.add('show');
+        loginCard.classList.add('shake');
+        setTimeout(() => loginCard.classList.remove('shake'), 500);
+      }
+    }
+
+    loginBtn.innerHTML = '<span class="btn-shimmer"></span>Authenticate & Enter';
+    loginBtn.disabled = false;
+  });
+
+  logoutBtn.addEventListener('click', function() {
+    currentUser = null;
+    loginScreen.classList.remove('hidden');
+    mainNav.classList.add('nav-hidden');
+    app.classList.remove('visible');
+    loginIdInput.value = '';
+    loginPassInput.value = '';
+    loginError.classList.remove('show');
+    resetPipeline();
+    clearTerminal();
+  });
+
+  // ===== FORM STATE =====
+  let applicantType = 'salaried';
+  let loanType = 'Personal';
+  let notifChannel = 'Email';
+
+  // Applicant toggle
+  document.getElementById('applicant-toggle').addEventListener('click', function(e) {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    this.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applicantType = btn.dataset.value;
+    updateSummary();
+  });
+
+  // Loan type cards
+  document.getElementById('loan-type-cards').addEventListener('click', function(e) {
+    const card = e.target.closest('.loan-type-card');
+    if (!card) return;
+    this.querySelectorAll('.loan-type-card').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    loanType = card.dataset.value;
+    updateSummary();
+  });
+
+  // Notification options
+  document.getElementById('notif-options').addEventListener('click', function(e) {
+    const opt = e.target.closest('.notif-option');
+    if (!opt) return;
+    this.querySelectorAll('.notif-option').forEach(o => o.classList.remove('active'));
+    opt.classList.add('active');
+    notifChannel = opt.dataset.value;
+    updateSummary();
+  });
+
+  // Amount input
+  const amountInput = document.getElementById('loan-amount');
+  const amountLabel = document.getElementById('amount-label');
+  const submitBtn = document.getElementById('submit-btn');
+
+  amountInput.addEventListener('input', function() {
+    let val = this.value.replace(/[^0-9]/g, '');
+    if (val) {
+      const num = parseInt(val, 10);
+      this.value = num.toLocaleString('en-IN');
+      amountLabel.textContent = formatIndianCurrency(num);
+      submitBtn.disabled = false;
+    } else {
+      this.value = '';
+      amountLabel.textContent = '';
+      submitBtn.disabled = true;
+    }
+    updateSummary();
+  });
+
+  function formatIndianCurrency(num) {
+    if (num >= 10000000) return '₹' + (num / 10000000).toFixed(1) + ' Cr';
+    if (num >= 100000) return '₹' + (num / 100000).toFixed(1) + ' L';
+    if (num >= 1000) return '₹' + (num / 1000).toFixed(1) + ' K';
+    return '₹' + num;
+  }
+
+  function getRawAmount() {
+    return parseInt(amountInput.value.replace(/[^0-9]/g, ''), 10) || 0;
+  }
+
+  // ===== SUMMARY UPDATE =====
+  function getFactoryName() {
+    return applicantType === 'salaried' ? 'SalariedLoanFactory' : 'SelfEmployedLoanFactory';
+  }
+  function getLoanClassName() {
+    const prefix = applicantType === 'salaried' ? 'Salaried' : 'SelfEmployed';
+    return prefix + loanType + 'Loan';
+  }
+  function getNotifClassName() {
+    if (notifChannel === 'Email') return 'EmailNotification';
+    if (notifChannel === 'SMS') return 'SMSNotification';
+    return 'MobileAppNotification';
+  }
+  function getNotifDisplay() {
+    if (notifChannel === 'Email') return '📧 Email';
+    if (notifChannel === 'SMS') return '💬 SMS';
+    return '📱 Mobile App';
+  }
+  function getNotifTag() {
+    if (notifChannel === 'Email') return '[Email Sent]';
+    if (notifChannel === 'SMS') return '[SMS Sent]';
+    return '[Mobile App Push]';
+  }
+
+  function getApproverForAmount(amount) {
+    if (amount <= 50000) return 'Branch Manager';
+    if (amount <= 200000) return 'Regional Head';
+    if (amount <= 500000) return 'Risk Committee';
+    return 'REJECTED';
+  }
+
+  function updateSummary() {
+    document.getElementById('sum-applicant').textContent = applicantType === 'salaried' ? 'Salaried' : 'Self-Employed';
+    document.getElementById('sum-factory').textContent = getFactoryName();
+    document.getElementById('sum-loantype').textContent = loanType;
+    document.getElementById('sum-class').textContent = getLoanClassName();
+    const amt = getRawAmount();
+    document.getElementById('sum-amount').textContent = amt > 0 ? '₹' + amt.toLocaleString('en-IN') : '₹0';
+    document.getElementById('sum-notif').textContent = getNotifDisplay();
+    document.getElementById('sum-notif-class').textContent = getNotifClassName();
+
+    if (amt > 0) {
+      const approver = getApproverForAmount(amt);
+      const pathParts = [];
+      if (amt > 50000) pathParts.push('Branch Mgr →');
+      if (amt > 200000) pathParts.push('Regional Head →');
+      if (amt <= 50000) { pathParts.push('Branch Manager'); }
+      else if (amt <= 200000) { pathParts.push('Regional Head'); }
+      else if (amt <= 500000) { pathParts.push('Risk Committee'); }
+      else { pathParts.push('❌ Exceeds Limit'); }
+      document.getElementById('sum-path').textContent = pathParts.join(' ');
+      document.getElementById('sum-approver').textContent = approver;
+      document.getElementById('sum-approver').style.color = approver === 'REJECTED' ? 'var(--danger)' : 'var(--success)';
+    } else {
+      document.getElementById('sum-path').textContent = '—';
+      document.getElementById('sum-approver').textContent = '—';
+      document.getElementById('sum-approver').style.color = '';
+    }
+  }
+
+  // ===== PIPELINE ANIMATION =====
+  function resetPipeline() {
+    ['node-branch', 'node-regional', 'node-risk'].forEach(id => {
+      const el = document.getElementById(id);
+      el.className = 'pipeline-node';
+    });
+    ['conn-1', 'conn-2'].forEach(id => {
+      const el = document.getElementById(id);
+      el.className = 'pipeline-connector';
+    });
+    ['status-branch', 'status-regional', 'status-risk'].forEach(id => {
+      document.getElementById(id).textContent = '—';
+    });
+  }
+
+  async function animatePipeline(amount) {
+    resetPipeline();
+
+    const branchNode = document.getElementById('node-branch');
+    const regionalNode = document.getElementById('node-regional');
+    const riskNode = document.getElementById('node-risk');
+    const conn1 = document.getElementById('conn-1');
+    const conn2 = document.getElementById('conn-2');
+    const statusBranch = document.getElementById('status-branch');
+    const statusRegional = document.getElementById('status-regional');
+    const statusRisk = document.getElementById('status-risk');
+
+    // Step 1: Branch Manager processes
+    branchNode.classList.add('processing');
+    addTerminalLine(`<span class="t-muted">[Pipeline]</span> Request received by Branch Manager...`);
+    await delay(1000);
+
+    if (amount <= 50000) {
+      branchNode.classList.remove('processing');
+      branchNode.classList.add('approved');
+      statusBranch.textContent = 'APPROVED';
+      regionalNode.classList.add('skipped');
+      statusRegional.textContent = '—';
+      riskNode.classList.add('skipped');
+      statusRisk.textContent = '—';
+      await logApproval('Branch Manager', amount);
+      return;
+    }
+
+    // Forward to Regional Head
+    branchNode.classList.remove('processing');
+    branchNode.classList.add('skipped');
+    statusBranch.textContent = 'FORWARDED';
+    addTerminalLine(`<span class="t-warn">Branch Manager forwarding to Regional Head...</span>`);
+    conn1.classList.add('flowing');
+    await delay(800);
+    conn1.classList.add('active');
+
+    regionalNode.classList.add('processing');
+    addTerminalLine(`<span class="t-muted">[Pipeline]</span> Request received by Regional Head...`);
+    await delay(1000);
+
+    if (amount <= 200000) {
+      regionalNode.classList.remove('processing');
+      regionalNode.classList.add('approved');
+      statusRegional.textContent = 'APPROVED';
+      riskNode.classList.add('skipped');
+      statusRisk.textContent = '—';
+      await logApproval('Regional Head', amount);
+      return;
+    }
+
+    // Forward to Risk Committee
+    regionalNode.classList.remove('processing');
+    regionalNode.classList.add('skipped');
+    statusRegional.textContent = 'FORWARDED';
+    addTerminalLine(`<span class="t-warn">Regional Head forwarding to Risk Committee...</span>`);
+    conn2.classList.add('flowing');
+    await delay(800);
+    conn2.classList.add('active');
+
+    riskNode.classList.add('processing');
+    addTerminalLine(`<span class="t-muted">[Pipeline]</span> Request received by Risk Committee...`);
+    await delay(1000);
+
+    if (amount <= 500000) {
+      riskNode.classList.remove('processing');
+      riskNode.classList.add('approved');
+      statusRisk.textContent = 'APPROVED';
+      await logApproval('Risk Committee', amount);
+      return;
+    }
+
+    // REJECTED
+    riskNode.classList.remove('processing');
+    riskNode.classList.add('rejected');
+    statusRisk.textContent = 'REJECTED';
+    addTerminalLine('');
+    addTerminalLine(`<span class="t-error">[REJECTED] Amount ₹${amount.toLocaleString('en-IN')} exceeds maximum Risk Committee limit of ₹5,00,000.</span>`);
+  }
+
+  async function logApproval(approver, amount) {
+    const loanTypeStr = (applicantType === 'salaried' ? 'Salaried' : 'Self-Employed') + ' ' + loanType + ' Loan';
+    const notifTag = getNotifTag();
+
+    addTerminalLine('');
+    addTerminalLine(`<span class="t-success">${notifTag} Your ${loanTypeStr} application for ₹${amount.toLocaleString('en-IN')} has been approved by ${approver}.</span>`);
+    await delay(400);
+    addTerminalLine(`<span class="t-purple">[Audit Department] Loan logged for ₹${amount.toLocaleString('en-IN')} approved by ${approver}.</span>`);
+    await delay(300);
+    addTerminalLine(`<span class="t-purple">[Accounts Department] Disbursement and risk allocation checked for ₹${amount.toLocaleString('en-IN')}.</span>`);
+    await delay(300);
+    addTerminalLine(`<span class="t-prefix">[Database] Loan request saved successfully to Oracle 11g 'loan_requests' table.</span>`);
+  }
+
+  function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  // ===== TERMINAL =====
+  const terminalBody = document.getElementById('terminal-body');
+  let terminalInitialized = false;
+
+  function clearTerminal() {
+    terminalBody.innerHTML = `<div class="terminal-placeholder">
+      <span class="tp-icon">⌨️</span>
+      <span>Submit a loan application to see the pipeline output</span>
+    </div>`;
+    terminalInitialized = false;
+  }
+
+  function addTerminalLine(html) {
+    if (!terminalInitialized) {
+      terminalBody.innerHTML = '';
+      terminalInitialized = true;
+    }
+    const line = document.createElement('div');
+    line.className = 'terminal-line';
+    line.innerHTML = html || '&nbsp;';
+    terminalBody.appendChild(line);
+    terminalBody.scrollTop = terminalBody.scrollHeight;
+  }
+
+  // ===== SUBMIT (calls Java backend POST /api/loan) =====
+  submitBtn.addEventListener('click', async function() {
+    const amount = getRawAmount();
+    if (amount <= 0) return;
+
+    this.disabled = true;
+    this.textContent = 'Processing...';
+
+    // Clear previous results
+    resetPipeline();
+    clearTerminal();
+    terminalInitialized = true;
+    terminalBody.innerHTML = '';
+
+    addTerminalLine(`<span class="t-muted">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>`);
+    addTerminalLine(`<span class="t-prefix">Banking Loan Application & Risk Pipeline System</span>`);
+    addTerminalLine(`<span class="t-muted">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>`);
+    addTerminalLine('');
+
+    // Re-check server status
+    await checkServerHealth();
+
+    if (serverOnline) {
+      // ── Call Java backend POST /api/loan ──
+      addTerminalLine(`<span class="t-success">▶ Connected to Java Server (LoanServer.java)</span>`);
+      addTerminalLine('');
+
+      try {
+        addTerminalLine(`<span class="t-muted">[API]</span> POST /api/loan → LoanServer.java`);
+        addTerminalLine(`<span class="t-muted">[API]</span> Payload: { applicantType: "${applicantType}", loanType: "${loanType}", amount: ${amount}, notifChannel: "${notifChannel}" }`);
+        addTerminalLine('');
+
+        const res = await fetch(`${API_BASE}/api/loan`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: currentUser.id,
+            password: currentPassword,
+            applicantType: applicantType,
+            loanType: loanType,
+            amount: amount,
+            notifChannel: notifChannel
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+          addTerminalLine(`<span class="t-error">[Server Error] ${data.error}</span>`);
+        } else {
+          // Show server-returned metadata
+          addTerminalLine(`<span class="t-muted">[Server]</span> Factory Used: <span class="t-prefix">${data.factoryUsed}</span>`);
+          addTerminalLine(`<span class="t-muted">[Server]</span> Loan Class: <span class="t-prefix">${data.loanClass}</span>`);
+          addTerminalLine(`<span class="t-muted">[Server]</span> Notifier: <span class="t-prefix">${data.notifierUsed}</span>`);
+          addTerminalLine('');
+
+          // Update summary with server response
+          document.getElementById('sum-factory').textContent = data.factoryUsed;
+          document.getElementById('sum-class').textContent = data.loanClass;
+          document.getElementById('sum-notif-class').textContent = data.notifierUsed;
+
+          // Animate pipeline based on chain steps from server
+          await animatePipelineFromServer(amount, data);
+
+          // Display process log from server (Observer outputs)
+          if (data.processLog && data.processLog.length > 0) {
+            addTerminalLine('');
+            for (const log of data.processLog) {
+              await delay(300);
+              if (log.includes('[Audit Department]') || log.includes('[Accounts Department]')) {
+                addTerminalLine(`<span class="t-purple">${escapeHtml(log)}</span>`);
+              } else if (log.includes('[Database]')) {
+                addTerminalLine(`<span class="t-prefix">${escapeHtml(log)}</span>`);
+              } else if (log.includes('[REJECTED]') || log.includes('Error')) {
+                addTerminalLine(`<span class="t-error">${escapeHtml(log)}</span>`);
+              } else {
+                addTerminalLine(`<span class="t-success">${escapeHtml(log)}</span>`);
+              }
+            }
+          }
+        }
+      } catch (err) {
+        addTerminalLine(`<span class="t-error">[Connection Error] ${err.message}</span>`);
+        addTerminalLine(`<span class="t-warn">Falling back to client-side processing...</span>`);
+        addTerminalLine('');
+        await runOfflinePipeline(amount);
+      }
+    } else {
+      // ── Offline fallback ──
+      addTerminalLine(`<span class="t-warn">⚠ Java server offline — processing client-side</span>`);
+      addTerminalLine('');
+      await runOfflinePipeline(amount);
+    }
+
+    addTerminalLine('');
+    addTerminalLine(`<span class="t-muted">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>`);
+
+    this.disabled = false;
+    this.innerHTML = '<span class="btn-shimmer"></span>Submit Loan Application';
+  });
+
+  // ===== PIPELINE FROM SERVER RESPONSE =====
+  async function animatePipelineFromServer(amount, data) {
+    resetPipeline();
+    const branchNode = document.getElementById('node-branch');
+    const regionalNode = document.getElementById('node-regional');
+    const riskNode = document.getElementById('node-risk');
+    const conn1 = document.getElementById('conn-1');
+    const conn2 = document.getElementById('conn-2');
+    const statusBranch = document.getElementById('status-branch');
+    const statusRegional = document.getElementById('status-regional');
+    const statusRisk = document.getElementById('status-risk');
+
+    const steps = data.chainSteps || [];
+
+    for (const step of steps) {
+      if (step.handler === 'Branch Manager') {
+        branchNode.classList.add('processing');
+        addTerminalLine(`<span class="t-muted">[Pipeline]</span> Request received by Branch Manager...`);
+        await delay(800);
+        branchNode.classList.remove('processing');
+        if (step.action === 'APPROVED') {
+          branchNode.classList.add('approved');
+          statusBranch.textContent = 'APPROVED';
+          regionalNode.classList.add('skipped');
+          riskNode.classList.add('skipped');
+        } else {
+          branchNode.classList.add('skipped');
+          statusBranch.textContent = 'FORWARDED';
+          addTerminalLine(`<span class="t-warn">Branch Manager forwarding to Regional Head...</span>`);
+          conn1.classList.add('flowing');
+          await delay(600);
+          conn1.classList.add('active');
+        }
+      } else if (step.handler === 'Regional Head') {
+        regionalNode.classList.add('processing');
+        addTerminalLine(`<span class="t-muted">[Pipeline]</span> Request received by Regional Head...`);
+        await delay(800);
+        regionalNode.classList.remove('processing');
+        if (step.action === 'APPROVED') {
+          regionalNode.classList.add('approved');
+          statusRegional.textContent = 'APPROVED';
+          riskNode.classList.add('skipped');
+        } else {
+          regionalNode.classList.add('skipped');
+          statusRegional.textContent = 'FORWARDED';
+          addTerminalLine(`<span class="t-warn">Regional Head forwarding to Risk Committee...</span>`);
+          conn2.classList.add('flowing');
+          await delay(600);
+          conn2.classList.add('active');
+        }
+      } else if (step.handler === 'Risk Committee') {
+        riskNode.classList.add('processing');
+        addTerminalLine(`<span class="t-muted">[Pipeline]</span> Request received by Risk Committee...`);
+        await delay(800);
+        riskNode.classList.remove('processing');
+        if (step.action === 'APPROVED') {
+          riskNode.classList.add('approved');
+          statusRisk.textContent = 'APPROVED';
+        } else {
+          riskNode.classList.add('rejected');
+          statusRisk.textContent = 'REJECTED';
+          addTerminalLine(`<span class="t-error">[REJECTED] Amount ₹${amount.toLocaleString('en-IN')} exceeds maximum Risk Committee limit of ₹5,00,000.</span>`);
+        }
+      }
+    }
+  }
+
+  // ===== OFFLINE FALLBACK PIPELINE =====
+  async function runOfflinePipeline(amount) {
+    addTerminalLine(`<span class="t-muted">[Config]</span> Applicant: <span class="t-prefix">${applicantType === 'salaried' ? 'Salaried' : 'Self-Employed'}</span>`);
+    addTerminalLine(`<span class="t-muted">[Config]</span> Factory: <span class="t-prefix">${getFactoryName()}</span>`);
+    addTerminalLine(`<span class="t-muted">[Config]</span> Loan Type: <span class="t-prefix">${loanType}</span>`);
+    addTerminalLine(`<span class="t-muted">[Config]</span> Loan Class: <span class="t-prefix">${getLoanClassName()}</span>`);
+    addTerminalLine(`<span class="t-muted">[Config]</span> Amount: <span class="t-prefix">₹${amount.toLocaleString('en-IN')}</span>`);
+    addTerminalLine(`<span class="t-muted">[Config]</span> Notifier: <span class="t-prefix">${getNotifClassName()}</span>`);
+    addTerminalLine('');
+    await delay(300);
+    await animatePipeline(amount);
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ===== SMOOTH SCROLL NAV =====
+  document.querySelectorAll('.nav-links a').forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+      }
+    });
+  });
+
+  // Initialize summary
+  updateSummary();
+})();
+</script>
+
+</body>
+</html>
